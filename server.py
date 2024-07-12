@@ -5,18 +5,6 @@ import json
 
 app_path = os.path.join(os.getenv('LOCALAPPDATA'), 'auto-transfer')
 
-if not os.path.exists(app_path):
-    os.makedirs(app_path)
-    with open(os.path.join(app_path, 'settings.json'), 'w') as file:
-        json.dump({
-            "ip": "127.0.0.1",
-            "port": "4456",
-            "watch_location": os.path.join(app_path, 'files'),
-            "extensions": ['.xlsx', '.pdf', '.png', '.jpg']
-        }, file)
-    # print("[+] Created App Directory successfully!")
-
-
 with open(os.path.join(app_path, 'settings.json'), 'r') as file:
     settings = json.load(file)
 
