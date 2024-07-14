@@ -165,5 +165,4 @@ send
 recieve
 Lib
 Scripts
-server.*
-update.*
+connections.json
