@@ -163,3 +163,7 @@ cython_debug/
 *.xlsx
 send
 recieve
+Lib
+Scripts
+server.*
+update.*

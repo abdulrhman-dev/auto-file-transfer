@@ -1,0 +1,14 @@
+[
+  {
+    "ip": "127.0.0.1",
+    "prefix": "ABOOD1",
+    "extensions": [".txt", ".xlsx"],
+    "port": 4456
+  },
+  {
+    "ip": "192.168.1.14",
+    "prefix": "ABOOD2",
+    "extensions": [".xlsx"],
+    "port": 4456
+  }
+]

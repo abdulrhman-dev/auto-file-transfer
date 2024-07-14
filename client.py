@@ -4,90 +4,67 @@ import os
 import sys
 import json
 
-
-from tqdm import tqdm
 from datetime import date
+from files import recieve, send
 
 
-SERVER_LIST = [
-    {
-        'IP': '127.0.0.1',
-        'PREFIX': 'ABOOD1'
-    },
-    {
-        'IP': '192.168.1.14',
-        'PREFIX': 'ABOOD2'
-    }
-]
+with open('./connections.json', 'r') as f:
+    server_list = json.load(f)
 
-PORT = 4456
 SIZE = 1024
 FORMAT = "utf-8"
 
-CURRENT_DATE = date.today().strftime('%Y%m-%d')
+
 EXPORT_LOCATION = 'E:\\Projects\\auto-file-transfer\\send'
 
 
+if (len(sys.argv) < 2):
+    mode = 'RECIEVE'
+else:
+    match sys.argv[1]:
+        case 'r':
+            mode = 'RECIEVE'
+        case 's':
+            mode = 'SEND'
+        case _:
+            raise Exception(
+                'Mode must be either Recive indicated with the: r or send indicated with the: s')
+
+
 def main():
-    SELECTED_SERVERS = SERVER_LIST
+    selected_servers = server_list
 
-    if (len(sys.argv) > 1):
-        SERVER_INDEX = int(sys.argv[1])
-        SELECTED_SERVERS = [SERVER_LIST[SERVER_INDEX]]
-    for index, SERVER in enumerate(SELECTED_SERVERS, start=0):
+    if (len(sys.argv) > 2):
+        server_index = int(sys.argv[2])
+        selected_servers = [server_list[server_index]]
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client.settimeout(1)
+    for index, SERVER in enumerate(selected_servers, start=0):
         try:
-            client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            client.connect((SERVER['IP'], PORT))
+            client.connect((SERVER['ip'], SERVER['port']))
 
-            downloaded_files = None
+            if (mode == 'RECIEVE'):
+                client.send('$send'.encode())
+                print(client.recv(SIZE).decode())
+                current_date = date.today().strftime('%Y%m-%d')
+                recieve(client, EXPORT_LOCATION,
+                        SERVER['prefix'], current_date, True)
+            elif (mode == 'SEND'):
+                client.send('$recieve'.encode())
+                print(client.recv(SIZE).decode())
 
-            while downloaded_files is None or downloaded_files > 0:
-                str_value = client.recv(SIZE).decode(FORMAT)
-                data = json.loads(str_value)
-
-                if (downloaded_files is None):
-                    downloaded_files = data['files_len']
-
-                filepath = data['filepath']
-                directory_path = data['directory_path']
-                filesize = data['filesize']
-
-                print(f"[+] {filepath} received from the server.")
-                client.send(f"received {filepath}".encode(FORMAT))
-
-                bar = tqdm(range(filesize), f"Receiving {
-                    filepath}", unit="B", unit_scale=True, unit_divisor=SIZE)
-
-                if not os.path.exists(os.path.join(EXPORT_LOCATION, SERVER['PREFIX'], CURRENT_DATE, directory_path)):
-                    os.makedirs(os.path.join(EXPORT_LOCATION,
-                                SERVER['PREFIX'], CURRENT_DATE, directory_path))
-
-                accumlated_size = 0
-                with open(os.path.join(EXPORT_LOCATION, SERVER['PREFIX'], CURRENT_DATE, filepath), "wb") as f:
-                    while True:
-                        chunk = client.recv(SIZE)
-                        accumlated_size += len(chunk)
-
-                        if not chunk:
-                            break
-
-                        f.write(chunk)
-
-                        bar.update(len(chunk))
-                        if accumlated_size >= filesize:
-                            break
-                client.send(
-                    f"downloaded {filepath} successfully".encode(FORMAT))
-                bar.close()
-                downloaded_files -= 1
+                send_location = os.path.join(EXPORT_LOCATION, 'send')
+                send(client, send_location, SERVER['extensions'], True)
 
             client.close()
-            break
+            if (index < len(selected_servers) - 1):
+                print(f'[CLIENT] Changing server from ip:{
+                    SERVER['ip']} to ip:{selected_servers[index + 1]['ip']}')
         except socket.error as msg:
             print(msg)
-            if (index < len(SELECTED_SERVERS) - 1):
+            if (index < len(selected_servers) - 1):
                 print(f'[CLIENT] Changing server from ip:{
-                    SERVER['IP']} to ip:{SELECTED_SERVERS[index + 1]['IP']}')
+                    SERVER['ip']} to ip:{selected_servers[index + 1]['ip']}')
             continue
 
 

@@ -17,13 +17,13 @@ print("[FIREWALL] Setting up outbound rule")
 os.popen('netsh advfirewall firewall add rule name="TCP Port 4456" dir=out action=allow protocol=TCP localport=4456')
 
 
-app_path = os.path.join(os.getenv('LOCALAPPDATA'), 'auto-transfer')
-
 print("[PROGRAM] Adding server.exe to startup programs")
 startup = os.path.join(winshell.startup(), 'server.exe')
 server_path = os.path.join(os.getcwd(), 'server.exe')
 
 shutil.copy(server_path, startup)
+
+app_path = os.path.join(os.getenv('LOCALAPPDATA'), 'auto-transfer')
 
 print("[SETTINGS] Creating settings.json")
 
