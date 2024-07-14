@@ -37,10 +37,11 @@ def main():
     if (len(sys.argv) > 2):
         server_index = int(sys.argv[2])
         selected_servers = [server_list[server_index]]
-    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.settimeout(1)
+
     for index, SERVER in enumerate(selected_servers, start=0):
         try:
+            client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            client.settimeout(2.5)
             client.connect((SERVER['ip'], SERVER['port']))
 
             if (mode == 'RECIEVE'):
