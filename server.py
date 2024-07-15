@@ -2,7 +2,6 @@ import socket
 import os
 import json
 
-
 app_path = os.path.join(os.getenv('LOCALAPPDATA'), 'auto-transfer')
 
 with open(os.path.join(app_path, 'settings.json'), 'r') as file:
@@ -23,7 +22,7 @@ def list_files_walk(start_path, extensions):
 
     for root, dirs, files in os.walk(start_path):
         for file in files:
-            if (file.startswith('.')):
+            if (file.startswith('.') or file.startswith('~$')):
                 continue
             if (os.path.splitext(file)[1] in extensions):
                 directory_path = root.replace(start_path, "")
@@ -33,6 +32,7 @@ def list_files_walk(start_path, extensions):
                     {'directory_path': directory_path, 'filepath': filepath})
 
     return found_files
+
 
 def recieve(conn, export_location, prefix='', current_date='', log=False):
     downloaded_files = None

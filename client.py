@@ -10,12 +10,15 @@ from files import recieve, send
 
 with open('./connections.json', 'r') as f:
     server_list = json.load(f)
+    
+with open('./client_settings.json', 'r') as f:
+    client_settings = json.load(f)
 
 SIZE = 1024
 FORMAT = "utf-8"
 
 
-EXPORT_LOCATION = 'E:\\Projects\\auto-file-transfer\\send'
+EXPORT_LOCATION = client_settings['export_location']
 
 
 if (len(sys.argv) < 2):
@@ -43,6 +46,7 @@ def main():
             client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             client.settimeout(2.5)
             client.connect((SERVER['ip'], SERVER['port']))
+            client.settimeout(None)
 
             if (mode == 'RECIEVE'):
                 client.send('$send'.encode())
@@ -54,7 +58,7 @@ def main():
                 client.send('$recieve'.encode())
                 print(client.recv(SIZE).decode())
 
-                send_location = os.path.join(EXPORT_LOCATION, 'send')
+                send_location = os.path.join(EXPORT_LOCATION, SERVER['prefix'], 'send')
                 send(client, send_location, SERVER['extensions'], True)
 
             client.close()

@@ -23,7 +23,7 @@ def list_files_walk(start_path, extensions):
 
     for root, dirs, files in os.walk(start_path):
         for file in files:
-            if (file.startswith('.')):
+            if (file.startswith('.') or file.startswith('~$')):
                 continue
             if (os.path.splitext(file)[1] in extensions):
                 directory_path = root.replace(start_path, "")
